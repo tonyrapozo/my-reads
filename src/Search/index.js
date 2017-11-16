@@ -5,29 +5,38 @@ import Book from '../Book/index'
 
 class Search extends Component {
 
-    timeout = 0;
-
-    state = {
-        query : '',
-        books : [],
-        searching : false
+    constructor(props) {
+        super(props);
+        this.timeout = 0;
+        this.state = {
+            query: '',
+            books: [],
+            searching: false
+        }
     }
 
     updateQuery = (value) => {
         this.setState({
-            query : value.trim()
+            query: value
         });
 
         if (this.timeout) clearTimeout(this.timeout);
 
         this.timeout = setTimeout(() => {
             this.setState({
-                searching : true
+                searching: true
             })
-            BooksAPI.search(value, 10).then((books)=>{
+            BooksAPI.search(value, 10).then((books) => {
+                books = books.length > 0 ? books.map((book) => {
+                    var bookProp = this.props.books.filter((prop) => prop.id === book.id);
+                    if (bookProp.length > 0) {
+                        book.shelf = bookProp[0].shelf;
+                    }
+                    return book;
+                }) : [];
                 this.setState({
-                    books : books.length > 0 ? books : [],
-                    searching : false
+                    books: books,
+                    searching: false
                 })
             })
         }, 200);
@@ -39,10 +48,10 @@ class Search extends Component {
                 <div className="search-books-bar">
                     <Link className="close-search" to="/">Close</Link>
                     <div className="search-books-input-wrapper">
-                        <input type="text" 
-                               placeholder="Search by title or author"
-                               value={this.state.query}
-                               onChange={event => this.updateQuery(event.target.value)} />
+                        <input type="text"
+                            placeholder="Search by title or author"
+                            value={this.state.query}
+                            onChange={event => this.updateQuery(event.target.value)} />
                     </div>
                 </div>
                 <div className="search-books-results">

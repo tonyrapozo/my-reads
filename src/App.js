@@ -8,19 +8,16 @@ import Search from './Search/index'
 
 class App extends Component {
 
-    state = {
-        currentlyReading: [],
-        read: [],
-        wantToRead: [],
-        books: []
-    };
+    constructor(props) {
+        super(props);
+        this.state = {
+            books: []
+        };
+    }
 
     componentDidMount() {
         BooksAPI.getAll().then((data) => {
             this.setState({
-                currentlyReading: data.filter((item) => item.shelf === 'currentlyReading').map(item => item.id),
-                read: data.filter((item) => item.shelf === 'read').map(item => item.id),
-                wantToRead: data.filter((item) => item.shelf === 'wantToRead').map(item => item.id),
                 books: data
             })
         })
@@ -32,13 +29,10 @@ class App extends Component {
             .then((data) => {
                 this.setState((prevState) => {
                     var book = prevState.books.filter(item => item.id === updatedBook.id);
-                    if (book.length===0){
+                    if (book.length === 0) {
                         prevState.books.push(updatedBook);
                     }
                     return ({
-                        currentlyReading: data.currentlyReading,
-                        read: data.read,
-                        wantToRead: data.wantToRead,
                         books: prevState.books.map(book => {
                             book.shelf = 'none';
                             book.shelf = data.currentlyReading.filter(item => book.id === item).length > 0 ? 'currentlyReading' : book.shelf;
@@ -52,10 +46,6 @@ class App extends Component {
     }
 
     render() {
-        let currentlyReading = this.state.books.filter(book => this.state.currentlyReading.filter(item => book.id === item).length > 0);
-        let wantToRead = this.state.books.filter(book => this.state.wantToRead.filter(item => book.id === item).length > 0);
-        let read = this.state.books.filter(book => this.state.read.filter(item => book.id === item).length > 0);
-
         return (
             <div>
                 <Route exact path="/" render={() => (
@@ -65,9 +55,9 @@ class App extends Component {
                         </div>
                         <div className="list-books-content">
                             <div>
-                                <Bookshelf books={currentlyReading} onChange={this.changeState} title="Currently Reading"></Bookshelf>
-                                <Bookshelf books={wantToRead} onChange={this.changeState} title="Want to Read"></Bookshelf>
-                                <Bookshelf books={read} onChange={this.changeState} title="Read"></Bookshelf>
+                                <Bookshelf books={this.state.books} shelf='currentlyReading' onChange={this.changeState} title="Currently Reading"></Bookshelf>
+                                <Bookshelf books={this.state.books} shelf='wantToRead' onChange={this.changeState} title="Want to Read"></Bookshelf>
+                                <Bookshelf books={this.state.books} shelf='read' onChange={this.changeState} title="Read"></Bookshelf>
                             </div>
                         </div>
                         <div className="open-search">
@@ -77,6 +67,7 @@ class App extends Component {
                 )} />
                 <Route exact path="/create" render={({ history }) => (
                     <Search
+                        books={this.state.books}
                         onChange={(event, book) => {
                             this.changeState(event, book);
                             history.push('/');
