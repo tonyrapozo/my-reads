@@ -61,11 +61,11 @@ class App extends Component {
                             </div>
                         </div>
                         <div className="open-search">
-                            <Link to="/create">Add a book</Link>
+                            <Link to="/search">Add a book</Link>
                         </div>
                     </div>
                 )} />
-                <Route exact path="/create" render={({ history }) => (
+                <Route exact path="/search" render={({ history }) => (
                     <Search
                         books={this.state.books}
                         onChange={(event, book) => {
